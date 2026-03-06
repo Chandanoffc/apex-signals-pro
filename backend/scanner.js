@@ -5,22 +5,27 @@ export async function scanMarket() {
   try {
 
     const res = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price",
+      "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest",
       {
+        headers: {
+          "X-CMC_PRO_API_KEY": process.env.CMC_KEY
+        },
         params: {
-          ids: "bitcoin,ethereum,solana,binancecoin,xrp,dogecoin,cardano,avalanche-2",
-          vs_currencies: "usd",
-          include_24hr_change: "true"
+          start: "1",
+          limit: "10",
+          convert: "USD"
         }
       }
     );
 
-    const data = res.data;
+    const data = res.data.data;
 
-    const signals = Object.keys(data).map(k => ({
-      symbol: k.toUpperCase(),
-      price: data[k].usd,
-      change24h: data[k].usd_24h_change
+    const signals = data.map(c => ({
+      symbol: c.symbol,
+      price: c.quote.USD.price,
+      change24h: c.quote.USD.percent_change_24h,
+      volume24h: c.quote.USD.volume_24h,
+      marketCap: c.quote.USD.market_cap
     }));
 
     return signals;
