@@ -5,19 +5,25 @@ export async function scanMarket() {
   try {
 
     const res = await axios.get(
-      "https://fapi.binance.com/fapi/v1/premiumIndex"
+      "https://api.coingecko.com/api/v3/coins/markets",
+      {
+        params: {
+          vs_currency: "usd",
+          order: "volume_desc",
+          per_page: 10,
+          page: 1
+        }
+      }
     );
 
     const data = res.data;
 
-    const signals = data
-      .filter(x => Math.abs(parseFloat(x.lastFundingRate)) > 0.01)
-      .slice(0, 10)
-      .map(x => ({
-        symbol: x.symbol,
-        fundingRate: x.lastFundingRate,
-        markPrice: x.markPrice
-      }));
+    const signals = data.map(c => ({
+      symbol: c.symbol.toUpperCase(),
+      price: c.current_price,
+      volume: c.total_volume,
+      change24h: c.price_change_percentage_24h
+    }));
 
     return signals;
 
