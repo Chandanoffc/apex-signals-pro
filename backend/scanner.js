@@ -12,6 +12,9 @@ export async function scanMarket() {
           order: "volume_desc",
           per_page: 10,
           page: 1
+        },
+        headers: {
+          "User-Agent": "apex-signals"
         }
       }
     );
