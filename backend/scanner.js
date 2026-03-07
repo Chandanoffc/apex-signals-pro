@@ -1,4 +1,6 @@
-import axios from "axios";
+import axios from "axios"
+import { generateSignals } from "./engine.js"
+import { getFundingRates } from "./funding.js"
 
 export async function scanMarket() {
 
@@ -12,27 +14,28 @@ export async function scanMarket() {
         },
         params: {
           start: "1",
-          limit: "10",
+          limit: "50",
           convert: "USD"
         }
       }
-    );
+    )
 
-    const data = res.data.data;
-
-    const signals = data.map(c => ({
+    const coins = res.data.data.map(c => ({
       symbol: c.symbol,
       price: c.quote.USD.price,
       change24h: c.quote.USD.percent_change_24h,
-      volume24h: c.quote.USD.volume_24h,
-      marketCap: c.quote.USD.market_cap
-    }));
+      volume24h: c.quote.USD.volume_24h
+    }))
 
-    return signals;
+    const fundingRates = await getFundingRates()
+
+    const signals = generateSignals(coins, fundingRates)
+
+    return signals
 
   } catch (err) {
 
-    return { error: err.message };
+    return { error: err.message }
 
   }
 
